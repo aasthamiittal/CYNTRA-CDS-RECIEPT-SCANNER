@@ -37,7 +37,7 @@ export function logout() {
 // The store is taken from the employee record returned by the backend.
 export async function login(emp_no, password) {
   const device_id = getDeviceId();
-  const res = await fetch('/api/auth/login', {
+  const res = await fetch(`${__API_BASE__}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ emp_no, password, source: LOGIN_SOURCE, device_id })

@@ -8,13 +8,12 @@ place the order into the store you signed in to, so it shows on that store's CDS
 
 ```bash
 npm install
-cp .env.example .env   # set CYNTRA_API_URL
 npm run dev            # https://localhost:5173  (or https://<pc-ip>:5173 on a phone)
 npm test               # receipt parser tests
 ```
 
 The dev server uses a self-signed HTTPS cert (the camera only works on HTTPS);
-accept the browser warning once. `/api/*` is proxied to `CYNTRA_API_URL`.
+accept the browser warning once. `/api/*` is proxied to `API_URL` (hard-coded in `src/config.js`).
 
 ## Flow
 

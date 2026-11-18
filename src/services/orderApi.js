@@ -115,7 +115,7 @@ export async function placeOrder(payload, authToken) {
   // The backend expects the raw JWT in Authorization (no "Bearer " prefix).
   const headers = { 'Content-Type': 'application/json', Authorization: authToken };
 
-  const res = await fetch('/api/transaction/order-place', {
+  const res = await fetch(`${__API_BASE__}/api/transaction/order-place`, {
     method: 'POST',
     headers,
     body: JSON.stringify(payload)

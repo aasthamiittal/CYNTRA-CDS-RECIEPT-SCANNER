@@ -4,6 +4,10 @@
 // store the employee signed in to — see services/auth.js.
 // ---------------------------------------------------------------------------
 
+// Food API backend. In dev, /api calls go through the Vite proxy to this URL;
+// in a production build they are sent to it directly (see vite.config.js).
+export const API_URL = 'https://cyntra-dev-food-api.cravrr.com';
+
 // Login "source" sent to /api/auth/login. 'leap' = POS app; the employee needs
 // breez/leap/swift login access, and the store must be open (day started).
 export const LOGIN_SOURCE = 'leap';
