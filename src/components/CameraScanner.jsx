@@ -31,14 +31,13 @@ async function setFocus(track, mode) {
 }
 
 /**
- * Live rear-camera preview with a capture button. Falls back to the native
- * file/camera picker when getUserMedia is unavailable (http on a phone,
- * permission denied, no camera).
+ * Live rear-camera preview with a capture button, plus "Add manual" to type
+ * the order details without scanning (also the way out when the camera is
+ * unavailable: http on a phone, permission denied, no camera).
  */
-export default function CameraScanner({ onCapture }) {
+export default function CameraScanner({ onCapture, onManual }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
-  const fileRef = useRef(null);
   const peakRef = useRef({ value: 0, at: 0 });
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
@@ -49,7 +48,7 @@ export default function CameraScanner({ onCapture }) {
     let cancelled = false;
     async function start() {
       if (!navigator.mediaDevices?.getUserMedia) {
-        setError('Live camera needs HTTPS. Use "Take / upload photo" instead.');
+        setError('Live camera needs HTTPS. Use "Add manual" instead.');
         return;
       }
       try {
@@ -71,7 +70,7 @@ export default function CameraScanner({ onCapture }) {
         await videoRef.current.play();
         setReady(true);
       } catch (e) {
-        setError(`Camera unavailable (${e.name || e.message}). Use "Take / upload photo" instead.`);
+        setError(`Camera unavailable (${e.name || e.message}). Use "Add manual" instead.`);
       }
     }
     start();
@@ -155,14 +154,6 @@ export default function CameraScanner({ onCapture }) {
     }
   }
 
-  function onFile(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => onCapture(reader.result);
-    reader.readAsDataURL(file);
-  }
-
   return (
     <div className="scanner">
       <div className="viewfinder" onClick={refocus}>
@@ -177,23 +168,15 @@ export default function CameraScanner({ onCapture }) {
         {error && <div className="overlay-msg">{error}</div>}
       </div>
       <p className="hint">
-        Fit the top of the receipt (order type and Check #) inside the frame. Tap the preview to refocus.
+        Fit the top of the receipt inside the frame. Tap the preview to refocus.
       </p>
       <div className="actions">
+        <button className="btn" onClick={onManual} disabled={busy}>
+          Add manual
+        </button>
         <button className="btn primary" onClick={capture} disabled={!ready || busy}>
           {busy ? 'Capturing…' : 'Capture'}
         </button>
-        <button className="btn" onClick={() => fileRef.current.click()}>
-          Take / upload photo
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          hidden
-          onChange={onFile}
-        />
       </div>
     </div>
   );

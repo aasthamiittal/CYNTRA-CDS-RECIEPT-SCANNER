@@ -18,10 +18,10 @@ accept the browser warning once. `/api/*` is proxied to `API_URL` (hard-coded in
 ## Flow
 
 1. Sign in with Store ID + employee no + password (the Store ID is remembered on the device).
-1. Camera opens → **Capture** (or *Take / upload photo*).
+1. Camera opens → **Capture**, or **Add manual** to type Order Type / Check # / Customer without scanning.
 2. OCR runs in the browser (tesseract.js) → Order Type, Check #, Customer are filled in (editable).
 3. Hard-coded items from `src/config.js` are shown (qty adjustable).
-4. **Place Order to CDS** → `POST /api/transaction/order-place`.
+4. **Send to CDS** → `POST /api/transaction/order-place`.
 
 ## Mapping
 

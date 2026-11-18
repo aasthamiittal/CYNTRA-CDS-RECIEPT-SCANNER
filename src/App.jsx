@@ -42,6 +42,8 @@ export default function App() {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const scanRef = useRef(0);
+  // Manual entry = review form opened via "Add manual" (no captured photo).
+  const manual = !image;
 
   // Load the OCR engine and language model in the background right away, so
   // it is ready by the time a receipt is captured.
@@ -136,6 +138,18 @@ export default function App() {
     }
   }
 
+  // Skip the camera: open the same review form with empty fields to type in.
+  function handleManual() {
+    ++scanRef.current; // cancel any OCR still running
+    setImage(null);
+    setStep('review');
+    setError('');
+    setOcrProgress(null);
+    setRefining(false);
+    setFields({ orderType: '', checkNumber: '', customerName: '' });
+    setScanId(newScanId());
+  }
+
   function updateItem(idx, patch) {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
   }
@@ -181,7 +195,7 @@ export default function App() {
   }
 
   // Scanned values stay in state, so after signing in again the user is back
-  // on the same receipt and only has to press Place Order again.
+  // on the same receipt and only has to press Send to CDS again.
   function handleLogout(notice = '') {
     logout();
     setLoginNotice(notice);
@@ -221,7 +235,7 @@ export default function App() {
         />
       )}
 
-      {session && step === 'scan' && <CameraScanner onCapture={handleCapture} />}
+      {session && step === 'scan' && <CameraScanner onCapture={handleCapture} onManual={handleManual} />}
 
       {session && step === 'review' && (
         <div className="review">
@@ -262,33 +276,34 @@ export default function App() {
                 </label>
               </section>
 
-              <section className="card">
-                <h2>Items</h2>
-                {items.map((it, idx) => (
-                  <div className="item" key={it.sku}>
-                    <div className="item-main">
-                      <strong>{it.item_name}</strong>
-                      <span>{money(it.price)}</span>
+              {!manual && (
+                <section className="card">
+                  <h2>Items</h2>
+                  {items.map((it, idx) => (
+                    <div className="item" key={it.sku}>
+                      <div className="item-main">
+                        <strong>{it.item_name}</strong>
+                        <span>{money(it.price)}</span>
+                      </div>
+                      {it.modifiers?.length > 0 && (
+                        <ul className="mods">
+                          {it.modifiers.map((m) => (
+                            <li key={m}>{m}</li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="qty">
+                        <span>Qty {it.quantity}</span>
+                      </div>
                     </div>
-                    {it.modifiers?.length > 0 && (
-                      <ul className="mods">
-                        {it.modifiers.map((m) => (
-                          <li key={m}>{m}</li>
-                        ))}
-                      </ul>
-                    )}
-                    <div className="qty">
-                      <span>Qty {it.quantity}</span>
-                    </div>
+                  ))}
+                  <div className="totals">
+                    <div><span>Subtotal</span><span>{money(subTotal)}</span></div>
+                    <div><span>Tax ({TAX_PCT}%)</span><span>{money(tax)}</span></div>
+                    <div className="grand"><span>Total</span><span>{money(subTotal + tax)}</span></div>
                   </div>
-                ))}
-                <div className="totals">
-                  <div><span>Subtotal</span><span>{money(subTotal)}</span></div>
-                  <div><span>Tax ({TAX_PCT}%)</span><span>{money(tax)}</span></div>
-                  <div className="grand"><span>Total</span><span>{money(subTotal + tax)}</span></div>
-                </div>
-              </section>
-
+                </section>
+              )}
             </>
           )}
 
@@ -296,14 +311,14 @@ export default function App() {
 
           <div className="actions sticky">
             <button className="btn" onClick={reset} disabled={placing}>
-              Rescan
+              {manual ? 'Back' : 'Rescan'}
             </button>
             <button
               className="btn primary"
               onClick={handlePlaceOrder}
               disabled={placing || ocrProgress !== null}
             >
-              {placing ? 'Placing…' : 'Place Order to CDS'}
+              {placing ? 'Sending…' : 'Send to CDS'}
             </button>
           </div>
         </div>
