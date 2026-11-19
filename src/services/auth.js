@@ -56,12 +56,6 @@ export async function login(emp_no, password) {
     throw new Error(m ? (typeof m === 'string' ? m : JSON.stringify(m)) : `Login failed (${res.status})`);
   }
   const d = body.data;
-  if (!d?.auth_token) throw new Error('Login response did not include a token.');
-  const store_id = String(d.employee?.store_id ?? d.store_details?.store_id ?? '');
-  if (!store_id) throw new Error("Login response did not include the employee's store.");
-  if (!d.session_id) {
-    throw new Error(`No employee session found for this user. Open a session on the POS for store ${store_id} first.`);
-  }
   const session = {
     auth_token: d.auth_token,
     session_id: String(d.session_id),
